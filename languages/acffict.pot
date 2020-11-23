@@ -1,0 +1,44 @@
+# Copyright (C) 2020 Eduardo Marcolino
+# This file is distributed under the same license as the ACF: Fields in Custom Table plugin.
+msgid ""
+msgstr ""
+"Project-Id-Version: ACF: Fields in Custom Table 0.1\n"
+"Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/acf-fields-in-custom-table\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"POT-Creation-Date: 2020-11-23T18:53:30+00:00\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"X-Generator: WP-CLI 2.4.0\n"
+"X-Domain: acffict\n"
+
+#. Plugin Name of the plugin
+#: acf-fields-in-custom-table.php:56
+msgid "ACF: Fields in Custom Table"
+msgstr ""
+
+#. Description of the plugin
+msgid "Stores ACF custom fields in a custom table instead of WordPress' core meta tables."
+msgstr ""
+
+#. Author of the plugin
+msgid "Eduardo Marcolino"
+msgstr ""
+
+#. Author URI of the plugin
+msgid "https://eduardomarcolino.com"
+msgstr ""
+
+#: acf-fields-in-custom-table.php:57
+msgid "Enable ACF: Fields in Custom Table for this field group?"
+msgstr ""
+
+#: acf-fields-in-custom-table.php:67
+msgid "Custom table name"
+msgstr ""
+
+#: acf-fields-in-custom-table.php:68
+msgid "Define the custom table name. Make sure it doesn't conflict with others tables names."
+msgstr ""
