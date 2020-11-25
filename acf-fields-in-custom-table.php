@@ -39,27 +39,45 @@ if ( ! class_exists( 'ACF_FICT' ) )
 
     private function __construct()
     {
-      add_action( 'acf/render_field_group_settings', [$this, 'registerSettings'] );
+      add_action( 'acf/field_group/admin_head', [$this, 'registerMetaBox'] );
       add_action( 'acf/update_field_group', [$this, 'createOrUpdateTable'] );
       add_action( 'acf/save_post', [$this, 'storeFieldsInCustomTable'], 1 );
       add_action( 'delete_post', [$this, 'deleteFieldsInCustomTable'] );
 
+      add_action( 'admin_notices', function()
+      {
+        if ( false !== ($message = $this->getAdminNotice()))
+        {
+          echo sprintf('<div class="notice notice-%s"><p>%s</p></div>',
+            $message['status'],
+            $message['message']
+          );
+        }
+      });
+
       add_filter( 'acf/load_field', [$this, 'addSettingsData'] );
       add_filter( 'acf/load_value', [$this, 'loadFieldFromCustomTable'], 11, 3 );
+      add_filter( "acf/validate_field_group", [$this, 'validateFieldGroup'] );
 
       load_plugin_textdomain( 'acffict', false, dirname( plugin_basename( ACF_FICT_PLUGIN_FILE ) ) . '/languages' );
     }
 
-    public function registerSettings( $field_group )
+    public function registerMetaBox() {
+      add_meta_box('acf-field-acffict', 'ACF: Fields in Custom Table', [$this, 'renderMetaBox'], 'acf-field-group', 'normal');
+    }
+
+    public function renderMetaBox( )
     {
+      global $field_group;
+
       acf_render_field_wrap( [
-        'label'			    => __('ACF: Fields in Custom Table', 'acffict'),
-        'instructions'	=> __( 'Enable ACF: Fields in Custom Table for this field group?', 'acffict' ),
+        'label'			    => __('Enabled', 'acffict'),
+        'instructions'	=> __( 'Enable Store fields in custom table for this field group?', 'acffict' ),
         'type'			    => 'true_false',
         'name'			    => self::SETTINGS_ENABLED,
         'key'           => self::SETTINGS_ENABLED,
         'prefix'		    => 'acf_field_group',
-        'value'         => acf_maybe_get( $field_group, self::SETTINGS_ENABLED, false ),
+        'value'         => esc_attr(acf_maybe_get( $field_group, self::SETTINGS_ENABLED, false )),
         'ui'			      => 1,
       ] );
 
@@ -69,7 +87,7 @@ if ( ! class_exists( 'ACF_FICT' ) )
         'type'			=> 'text',
         'name'			=> self::SETTINGS_TABLE_NAME,
         'prefix'		=> 'acf_field_group',
-        'value'			=> acf_maybe_get( $field_group, self::SETTINGS_TABLE_NAME, false ),
+        'value'			=> esc_attr(acf_maybe_get( $field_group, self::SETTINGS_TABLE_NAME, false )),
         'prepend'   => $this->getTableName(),
         'required'  => true,
         'conditional_logic' => [
@@ -78,6 +96,19 @@ if ( ! class_exists( 'ACF_FICT' ) )
           'value' => '1',
         ]
       ] );
+
+      ?>
+        <script type="text/javascript">
+        if( typeof acf !== 'undefined' ) {
+
+          acf.newPostbox({
+            'id': 'acf-field-acffict',
+            'label': 'left'
+          });
+
+        }
+        </script>
+      <?php
     }
 
     public function addSettingsData( $field )
@@ -95,7 +126,7 @@ if ( ! class_exists( 'ACF_FICT' ) )
       return $field;
     }
 
-    #@todo: Improve security by check table name and column
+
     public function storeFieldsInCustomTable( $post_id )
     {
       global $wpdb;
@@ -103,26 +134,31 @@ if ( ! class_exists( 'ACF_FICT' ) )
 
       foreach ( $_POST['acf'] as $key => $value )
       {
-        $field = get_field_object( $key );
+        $field = get_field_object( sanitize_key( $key ) );
 
         if (
           $field[self::SETTINGS_ENABLED] && $field['name'] &&
           $this->isFieldSupported($field)
         ) {
-          $values[$field[self::SETTINGS_TABLE_NAME]][$field['name']] = $value;
+          $values[$field[self::SETTINGS_TABLE_NAME]][$this->sanitizeColumnName($field['name'])] = $this->sanitizeInput($value, $field);
         }
       }
 
       foreach ( $values as $table_name => $data)
       {
         $data['post_id'] = $post_id;
-        if ( false  === $wpdb->replace($this->getTableName($table_name), $data ) ) {
-          throw new Exception('Insert error');
+
+        $wpdb->suppress_errors = true;
+        $wpdb->show_errors = false;
+
+        if ( false  === $wpdb->replace($this->getTableName($table_name), $data ) )
+        {
+          $message = __('ACF: Fields in Custom Table error:', 'acffict').$wpdb->last_error;
+          $this->addAdminNotice($message, 'error');
         }
       }
     }
 
-    #@todo: Improve security by check table name and column
     public function deleteFieldsInCustomTable($post_id)
     {
       global $wpdb;
@@ -154,27 +190,33 @@ if ( ! class_exists( 'ACF_FICT' ) )
       foreach ( $fields as $field )
       {
         if ( false !== ( $column = $this->getColumnDefinition( $field ) ) ) {
-          $columns[$field['name']] = $column;
+          $columns[$this->sanitizeColumnName($field['name'])] = $column;
         }
       }
 
-      $success = $this->doCreateOrAlterTable(
+      $response = $this->doCreateOrAlterTable(
         $this->getTableName( $field_group[self::SETTINGS_TABLE_NAME] ),
         $columns
       );
 
-      if ( !$success ) throw new Exception( 'Table creation error' );
+      if ( $response !== true ) {
+        $message = __('ACF: Fields in Custom Table error:', 'acffict').$response;
+        $this->addAdminNotice($message, 'error');
+      }
     }
 
-    #@todo: Improve security by check table name and column
     public function loadFieldFromCustomTable( $value, $post_id, $field )
     {
-      if ($field[self::SETTINGS_ENABLED])
+      $table_name = $this->getTableName( $field[self::SETTINGS_TABLE_NAME] );
+      if (
+        array_key_exists(self::SETTINGS_ENABLED, $field) &&
+        $field[self::SETTINGS_ENABLED] &&
+        $this->tableExists( $table_name )
+      )
       {
         global $wpdb;
 
-        $column_name = esc_sql($field['name']);
-        $table_name = esc_sql($this->getTableName($field[self::SETTINGS_TABLE_NAME]));
+        $column_name = sanitize_key($field['name']);
 
         $value = $wpdb->get_var( $wpdb->prepare(
           "SELECT $column_name FROM $table_name WHERE post_id = %d", $post_id
@@ -186,10 +228,21 @@ if ( ! class_exists( 'ACF_FICT' ) )
       return $value;
     }
 
-    #@todo: Improve security by check table name and column
+    public function validateFieldGroup( $field_group )
+    {
+      if ( array_key_exists( self::SETTINGS_TABLE_NAME, $field_group ) ) {
+        $field_group[self::SETTINGS_TABLE_NAME] = $this->sanitizeTableName( $field_group[self::SETTINGS_TABLE_NAME] );
+      }
+      return $field_group;
+    }
+
     private function doCreateOrAlterTable($table_name, $columns)
     {
       global $wpdb;
+
+      $wpdb->suppress_errors = true;
+      $wpdb->show_errors = false;
+
       $query = $wpdb->prepare( 'SHOW TABLES LIKE %s', $wpdb->esc_like( $table_name ) );
 
       if ( $wpdb->get_var( $query ) === $table_name )
@@ -205,6 +258,9 @@ if ( ! class_exists( 'ACF_FICT' ) )
         {
           if ( array_key_exists($column_key, $columns)) {
             $wpdb->query("ALTER TABLE ".$table_name." ADD ".$columns[$column_key]." COMMENT 'Added at ".date('Y-m-d H:i:s')."' ");
+            if ( $wpdb->last_error ) {
+              return $wpdb->last_error;
+            }
           }
         }
 
@@ -214,7 +270,7 @@ if ( ! class_exists( 'ACF_FICT' ) )
           array_column($results, 'Field')
         );
 
-        return count($missing_columns) == 0;
+        return count($missing_columns) == 0 ? true : __('Unable to alter table', 'acffict');
       } else
       {
         $create_ddl = "CREATE TABLE IF NOT EXISTS $table_name (
@@ -224,12 +280,57 @@ if ( ! class_exists( 'ACF_FICT' ) )
         ) ENGINE=InnoDB {$wpdb->get_charset_collate()};";
 
         $wpdb->query( $create_ddl );
+
+        if ( $wpdb->last_error ) {
+          return $wpdb->last_error;
+        }
+
         if ( $wpdb->get_var( $query ) === $table_name ) {
           return true;
         }
 
         return false;
       }
+    }
+
+    private function sanitizeInput( $value, $field )
+    {
+      $sanitized_value = null;
+
+      switch ( $field['type'] )
+      {
+        case 'text':
+        case 'image':
+        case 'email':
+        case 'url':
+        case 'password':
+        case 'select':
+        case 'color_picker':
+        case 'date_picker':
+          $sanitized_value = sanitize_text_field( $value );
+          break;
+        case 'wysiwyg':
+          $sanitized_value = wp_kses_post( $value );
+          break;
+        case 'textarea':
+          $sanitized_value = sanitize_textarea_field( $value );
+          break;
+        case 'true_false':
+        case 'number':
+          $sanitized_value = filter_var( $value, FILTER_SANITIZE_NUMBER_INT );
+          break;
+        default:
+          $sanitized_value = '';
+      }
+
+      return $sanitized_value;
+    }
+
+    private function sanitizeTableName($value) {
+      return str_replace( '-','_', sanitize_key( $value ) );
+    }
+    private function sanitizeColumnName($value) {
+      return $this->sanitizeTableName($value);
     }
 
     private function getColumnDefinition( $field )
@@ -279,11 +380,34 @@ if ( ! class_exists( 'ACF_FICT' ) )
 
     private function getTableName($name = '') {
       global $wpdb;
-      return sprintf('%s%s%s', $wpdb->prefix, 'fict_', $name);
+      return sprintf('%s%s%s', $wpdb->prefix, 'acf_', $name);
     }
 
     private function isFieldSupported($field) {
       return $this->getColumnDefinition($field) !== false;
+    }
+
+    private function tableExists($table_name)
+    {
+      global $wpdb;
+      $query = $wpdb->prepare( 'SHOW TABLES LIKE %s', $wpdb->esc_like( $table_name ) );
+      return $wpdb->get_var( $query ) === $table_name;
+    }
+
+    private function addAdminNotice($message, $status) {
+      set_transient('acffict_notice_' . get_current_user_id(), [
+        'message' => $message,
+        'status' => $status
+      ], 30);
+    }
+
+    private function getAdminNotice() {
+      $key = 'acffict_notice_' . get_current_user_id();
+      $transient = get_transient( $key );
+      if ( $transient ) {
+          delete_transient( $key );
+      }
+      return $transient;
     }
   }
 
