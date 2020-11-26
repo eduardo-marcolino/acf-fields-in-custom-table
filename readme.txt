@@ -15,6 +15,22 @@ Stores ACF custom fields in a custom table instead of WordPress core meta tables
 
 This ACF plugin makes it possible to store ACF data in structured database tables instead of WordPress core meta tables.
 
+It was heavily inspired by Austin Ginder's post https://anchor.host/acf-custom-fields-stored-in-custom-table/.
+
+= Supported Fields =
+
+* text
+* email
+* url
+* password
+* select
+* color_picker
+* number
+* wysiwyg
+* textarea
+* date_picker
+* true_false
+
 = ACF Compatibility =
 
 This plugin was testes with *ACF 5 FREE Version* .
