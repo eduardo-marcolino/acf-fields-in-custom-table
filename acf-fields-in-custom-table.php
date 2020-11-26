@@ -1,7 +1,7 @@
 <?php
 /*
 Plugin Name: ACF: Fields in Custom Table
-Description: Stores ACF custom fields in a custom table instead of WordPress' core meta tables.
+Description: Stores ACF custom fields in a custom table instead of WordPress core meta tables.
 Version: 0.1
 Author: Eduardo Marcolino
 Author URI: https://eduardomarcolino.com
@@ -9,6 +9,7 @@ Text Domain: acffict
 Domain Path: /languages
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
+GitHub Plugin URI: https://github.com/eduardo-marcolino/acf-fields-in-custom-table
 */
 
 // Exit if accessed directly

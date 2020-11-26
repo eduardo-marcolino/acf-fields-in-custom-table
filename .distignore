@@ -1,0 +1,12 @@
+/.wordpress-org
+/.git
+/.github
+/node_modules
+
+.distignore
+.gitignore
+
+docker-compose.yml
+composer.json
+
+README.md

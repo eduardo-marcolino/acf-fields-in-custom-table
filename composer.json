@@ -1,0 +1,16 @@
+{
+	"name"       : "eduardo-marcolino/acf-fields-in-custom-table",
+	"description": "ACF: Fields in Custom Table",
+	"homepage"   : "https://github.com/eduardo-marcolino/acf-fields-in-custom-table",
+	"type"       : "wordpress-plugin",
+	"keywords"   : ["acf","advanced custom fields","fields","meta","custom fields"],
+	"license"    : "GPL-2.0+",
+	"authors"    : [{
+		"name"    : "Eduardo Marcolino",
+		"homepage": "http://eduardomarcolino.com"
+	}],
+	"require": {
+		"composer/installers": "~1.0",
+		"php": ">=7.0"
+	}
+}
