@@ -4,7 +4,7 @@ Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=TW8LT
 Tags: acf,advanced custom fields,fields,meta,custom fields
 Requires at least: 4.9.0
 Tested up to: 5.5.3
-Stable tag: 0.1
+Stable tag: 0.2
 Requires PHP: 7.0
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
@@ -15,21 +15,34 @@ Stores ACF custom fields in a custom table instead of WordPress core meta tables
 
 This ACF plugin makes it possible to store ACF data in structured database tables instead of WordPress core meta tables.
 
-It was heavily inspired by Austin Ginder's post https://anchor.host/acf-custom-fields-stored-in-custom-table/.
+It uses ACF's `acf/update_field_group` hook to create/update the database and then uses `acf/save_post` hook to store the data.
+
+It was heavily inspired by Austin Ginder's post [https://anchor.host/acf-custom-fields-stored-in-custom-table/](https://anchor.host/acf-custom-fields-stored-in-custom-table/).
+
+You can contribute to this plugin by submit PR/Issue in [https://github.com/eduardo-marcolino/acf-fields-in-custom-table](https://github.com/eduardo-marcolino/acf-fields-in-custom-table).
 
 = Supported Fields =
 
-* text
-* email
-* url
-* password
-* select
-* color_picker
-* number
-* wysiwyg
-* textarea
-* date_picker
-* true_false
+* Text
+* Text Area
+* Number
+* Range
+* Email
+* URL
+* Password
+* Image
+* File
+* Wysiwyg Editor
+* oEmbed
+* Select
+* Checkbox
+* Radio Button
+* Button Group
+* True / False
+* Date Picker
+* Date Time Picker
+* Time Picker
+* Color Picker
 
 = ACF Compatibility =
 
@@ -38,6 +51,12 @@ This plugin was testes with *ACF 5 FREE Version* .
 == Frequently Asked Questions ==
 
 = This plugin supports custom post types? =
+
+Yes. It supports custom post types and built in types of post and page
+
+= What happens if I use unsupported field? =
+
+The value will be stored in the core meta tables instead of the custom table
 
 Yes. It supports custom post types and built in types of post and page
 
@@ -54,6 +73,10 @@ Setting up ACF: Fields in Custom Table is very simple. Follow these easy steps
 3.	Go to the Custom Fields > Field Groups menu, edit or create a field group and enable ACF: Fields in Custom Table option;
 
 == Changelog ==
+
+= 0.2 =
+*	Added support for the following field types: Range, Image, File, oEmbed, Checkbox, Radio Button, Date Time Picker, Time Picker
+* Using dbDelta function to modify table
 
 = 0.1 =
 *	First version of the plugin released
