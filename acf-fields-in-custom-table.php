@@ -2,7 +2,7 @@
 /*
 Plugin Name: ACF: Fields in Custom Table
 Description: Stores ACF custom fields in a custom table instead of WordPress core meta tables.
-Version: 0.2
+Version: 0.3
 Author: Eduardo Marcolino
 Author URI: https://eduardomarcolino.com
 Text Domain: acfict
@@ -19,6 +19,36 @@ if ( ! class_exists( 'ACF_FICT' ) )
 {
   defined( 'ACF_FICT_PLUGIN_FILE' ) or define( 'ACF_FICT_PLUGIN_FILE', __FILE__ );
 
+  include_once( plugin_dir_path( __FILE__ ).'includes/acfict-utility-funcitons.php' );
+
+  acfict_include( 'includes/class-acfict-admin-notices.php' );
+  acfict_include( 'includes/fields/class-acfict-field.php' );
+  acfict_include( 'includes/fields/class-acfict-field-text.php' );
+  acfict_include( 'includes/fields/class-acfict-field-email.php' );
+  acfict_include( 'includes/fields/class-acfict-field-url.php' );
+  acfict_include( 'includes/fields/class-acfict-field-password.php' );
+  acfict_include( 'includes/fields/class-acfict-field-radio.php' );
+  acfict_include( 'includes/fields/class-acfict-field-button_group.php' );
+  acfict_include( 'includes/fields/class-acfict-field-oembed.php' );
+  acfict_include( 'includes/fields/class-acfict-field-number.php' );
+  acfict_include( 'includes/fields/class-acfict-field-range.php' );
+  acfict_include( 'includes/fields/class-acfict-field-file.php' );
+  acfict_include( 'includes/fields/class-acfict-field-image.php' );
+  acfict_include( 'includes/fields/class-acfict-field-true_false.php' );
+  acfict_include( 'includes/fields/class-acfict-field-color_picker.php' );
+  acfict_include( 'includes/fields/class-acfict-field-date_picker.php' );
+  acfict_include( 'includes/fields/class-acfict-field-date_time_picker.php' );
+  acfict_include( 'includes/fields/class-acfict-field-time_picker.php' );
+  acfict_include( 'includes/fields/class-acfict-field-textarea.php' );
+  acfict_include( 'includes/fields/class-acfict-field-wysiwyg.php' );
+  acfict_include( 'includes/fields/class-acfict-field-select.php' );
+  acfict_include( 'includes/fields/class-acfict-field-checkbox.php' );
+  acfict_include( 'includes/fields/class-acfict-field-link.php' );
+  acfict_include( 'includes/fields/class-acfict-field-relationship.php' );
+  acfict_include( 'includes/fields/class-acfict-field-post_object.php' );
+  acfict_include( 'includes/fields/class-acfict-field-page_link.php' );
+  acfict_include( 'includes/fields/class-acfict-field-taxonomy.php' );
+  acfict_include( 'includes/fields/class-acfict-field-user.php' );
 
   final class ACF_FICT
   {
@@ -40,34 +70,24 @@ if ( ! class_exists( 'ACF_FICT' ) )
 
     private function __construct()
     {
-      add_action( 'acf/field_group/admin_head', [$this, 'registerMetaBox'] );
-      add_action( 'acf/update_field_group', [$this, 'createOrUpdateTable'] );
-      add_action( 'acf/save_post', [$this, 'storeFieldsInCustomTable'], 1 );
-      add_action( 'delete_post', [$this, 'deleteFieldsInCustomTable'] );
+      add_action( 'acf/field_group/admin_head', [$this, 'register_meta_box'] );
+      add_action( 'acf/update_field_group', [$this, 'create_or_update_table'] );
+      add_action( 'acf/save_post', [$this, 'store_fields_in_custom_table'], 1 );
+      add_action( 'delete_post', [$this, 'delete_fields_in_custom_table'] );
+      add_action( 'admin_notices', [$this, 'display_admin_notices'] );
 
-      add_action( 'admin_notices', function()
-      {
-        if ( false !== ($message = $this->getAdminNotice()))
-        {
-          echo sprintf('<div class="notice notice-%s"><p>%s</p></div>',
-            $message['status'],
-            $message['message']
-          );
-        }
-      });
-
-      add_filter( 'acf/load_field', [$this, 'addSettingsData'] );
-      add_filter( 'acf/load_value', [$this, 'loadFieldFromCustomTable'], 11, 3 );
-      add_filter( "acf/validate_field_group", [$this, 'validateFieldGroup'] );
+      add_filter( 'acf/load_field', [$this, 'add_settings'] );
+      add_filter( 'acf/load_value', [$this, 'load_field_from_custom_table'], 11, 3 );
+      add_filter( "acf/validate_field_group", [$this, 'validate_field_group'] );
 
       load_plugin_textdomain( 'acfict', false, dirname( plugin_basename( ACF_FICT_PLUGIN_FILE ) ) . '/languages' );
     }
 
-    public function registerMetaBox() {
-      add_meta_box('acf-field-acfict', 'ACF: Fields in Custom Table', [$this, 'renderMetaBox'], 'acf-field-group', 'normal');
+    public function register_meta_box() {
+      add_meta_box('acf-field-acfict', 'ACF: Fields in Custom Table', [$this, 'render_meta_box'], 'acf-field-group', 'normal');
     }
 
-    public function renderMetaBox( )
+    public function render_meta_box()
     {
       global $field_group;
 
@@ -89,7 +109,7 @@ if ( ! class_exists( 'ACF_FICT' ) )
         'name'			=> self::SETTINGS_TABLE_NAME,
         'prefix'		=> 'acf_field_group',
         'value'			=> esc_attr(acf_maybe_get( $field_group, self::SETTINGS_TABLE_NAME, false )),
-        'prepend'   => $this->getTableName(),
+        'prepend'   => $this->table_name(),
         'required'  => true,
         'conditional_logic' => [
           'field' => self::SETTINGS_ENABLED,
@@ -112,7 +132,7 @@ if ( ! class_exists( 'ACF_FICT' ) )
       <?php
     }
 
-    public function addSettingsData( $field )
+    public function add_settings( $field )
     {
       $field_group = acf_get_field_group( $field['parent'] );
 
@@ -127,11 +147,11 @@ if ( ! class_exists( 'ACF_FICT' ) )
       return $field;
     }
 
-
-    public function storeFieldsInCustomTable( $post_id )
+    public function store_fields_in_custom_table( $post_id )
     {
       global $wpdb;
       $values = [];
+      //die(print_r($_POST['acf'], true));
 
       foreach ( $_POST['acf'] as $key => $value )
       {
@@ -139,12 +159,16 @@ if ( ! class_exists( 'ACF_FICT' ) )
 
         if (
           $field[self::SETTINGS_ENABLED] && $field['name'] &&
-          $this->isFieldSupported($field)
+          $this->is_supported($field)
         ) {
-          $values[$field[self::SETTINGS_TABLE_NAME]][$this->sanitizeColumnName($field['name'])] = $this->sanitizeInput($value, $field);
+          $column_name = acfict_sanitize_keyword($field['name']);
+          $values[$field[self::SETTINGS_TABLE_NAME]][$column_name] = apply_filters(
+            'acfict_sanitize_'.$field['type'],
+            $value,
+            $field
+          );
         }
       }
-
       foreach ( $values as $table_name => $data)
       {
         $data['post_id'] = $post_id;
@@ -152,15 +176,15 @@ if ( ! class_exists( 'ACF_FICT' ) )
         $wpdb->suppress_errors = true;
         $wpdb->show_errors = false;
 
-        if ( false  === $wpdb->replace($this->getTableName($table_name), $data ) )
+        if ( false  === $wpdb->replace($this->table_name($table_name), $data ) )
         {
           $message = __('ACF: Fields in Custom Table error:', 'acfict').$wpdb->last_error;
-          $this->addAdminNotice($message, 'error');
+          ACF_FICT_Admin_Notices::add($message, 'error');
         }
       }
     }
 
-    public function deleteFieldsInCustomTable($post_id)
+    public function delete_fields_in_custom_table($post_id)
     {
       global $wpdb;
 
@@ -171,15 +195,14 @@ if ( ! class_exists( 'ACF_FICT' ) )
           $field_group[self::SETTINGS_TABLE_NAME]
         ) {
           $wpdb->delete(
-            $this->getTableName($field_group[self::SETTINGS_TABLE_NAME]),
+            $this->table_name($field_group[self::SETTINGS_TABLE_NAME]),
             ['post_id' => $post_id]
           );
         }
       }
     }
 
-    #@todo: Restrict to only page, post and custom_post_type
-    public function createOrUpdateTable( $field_group )
+    public function create_or_update_table( $field_group )
     {
       if ( !$field_group[self::SETTINGS_ENABLED]) {
         return;
@@ -187,59 +210,34 @@ if ( ! class_exists( 'ACF_FICT' ) )
 
       $columns  = [];
       $fields   = acf_get_fields( $field_group );
+      //die('<pre>'.print_r($fields, true));
 
       foreach ( $fields as $field )
       {
-        if ( false !== ( $column = $this->getColumnDefinition( $field ) ) ) {
-          $columns[$this->sanitizeColumnName($field['name'])] = $column;
+        $column_type = apply_filters('acfict_column_type_'.$field['type'], $field);
+
+        if ( $column_type ) {
+          $columns[] = $column_type;
         }
       }
 
-      $response = $this->doCreateOrAlterTable(
-        $this->getTableName( $field_group[self::SETTINGS_TABLE_NAME] ),
+      $response = $this->do_create_or_alter_table(
+        $this->table_name( $field_group[self::SETTINGS_TABLE_NAME] ),
         $columns
       );
 
       if ( $response !== true ) {
         $message = __('ACF: Fields in Custom Table error:', 'acfict').$response;
-        $this->addAdminNotice($message, 'error');
+        ACF_FICT_Admin_Notices::add($message, 'error');
       }
     }
 
-    public function loadFieldFromCustomTable( $value, $post_id, $field )
+    private function do_create_Or_alter_table( $table_name, $columns )
     {
-      $table_name = $this->getTableName( $field[self::SETTINGS_TABLE_NAME] );
-      if (
-        array_key_exists(self::SETTINGS_ENABLED, $field) &&
-        $field[self::SETTINGS_ENABLED] &&
-        $this->tableExists( $table_name ) &&
-        $this->isFieldSupported($field)
-      )
-      {
-        global $wpdb;
-
-        $column_name = sanitize_key($field['name']);
-
-        $value = $wpdb->get_var( $wpdb->prepare(
-          "SELECT $column_name FROM $table_name WHERE post_id = %d", $post_id
-        ));
-
-        return $this->escapeField( $value, $field );
+      if (count($columns) === 0 ) {
+        return 'No supported fields';
       }
 
-      return $value;
-    }
-
-    public function validateFieldGroup( $field_group )
-    {
-      if ( array_key_exists( self::SETTINGS_TABLE_NAME, $field_group ) ) {
-        $field_group[self::SETTINGS_TABLE_NAME] = $this->sanitizeTableName( $field_group[self::SETTINGS_TABLE_NAME] );
-      }
-      return $field_group;
-    }
-
-    private function doCreateOrAlterTable($table_name, $columns)
-    {
       global $wpdb;
 
       $wpdb->suppress_errors = true;
@@ -267,179 +265,69 @@ if ( ! class_exists( 'ACF_FICT' ) )
           $notice .= sprintf('<tr><td>%s</td><td>%s</td></tr>', $column, $text);
         }
         $notice .= '</tbody></table>';
-        $this->addAdminNotice($notice, 'info');
+        ACF_FICT_Admin_Notices::add($notice, 'info');
       }
 
       return true;
     }
 
-    private function escapeField ( $value, $field)
+    public function load_field_from_custom_table( $value, $post_id, $field )
     {
-      switch ( $field['type'] )
+      $table_name = $this->table_name( $field[self::SETTINGS_TABLE_NAME] );
+      if (
+        array_key_exists(self::SETTINGS_ENABLED, $field) &&
+        $field[self::SETTINGS_ENABLED] &&
+        $this->table_exists( $table_name ) &&
+        $this->is_supported($field)
+      )
       {
-        case 'select':
-        case 'checkbox':
-          $object = json_decode($value);
-          $value = $object ? $object : $value;
-          break;
-        default:
-          $value = $value;
+        global $wpdb;
+
+        $column_name = sanitize_key($field['name']);
+
+        $value = $wpdb->get_var( $wpdb->prepare(
+          "SELECT $column_name FROM $table_name WHERE post_id = %d", $post_id
+        ));
+
+        return apply_filters('acfict_escape_'.$field['type'], $value, $field);
       }
+
       return $value;
     }
 
-    private function sanitizeInput( $value, $field )
+    public function validate_field_group( $field_group )
     {
-      $sanitized_value = null;
-
-      switch ( $field['type'] )
-      {
-        case 'text':
-        case 'email':
-        case 'url':
-        case 'password':
-        case 'color_picker':
-        case 'date_picker':
-        case 'date_time_picker':
-        case 'time_picker':
-        case 'radio':
-        case 'button_group':
-          $sanitized_value = sanitize_text_field( $value );
-          break;
-        case 'select':
-        case 'checkbox':
-          if ( is_array($value) )
-          {
-            $sanitized_value = json_encode(array_map( function($item) {
-              return sanitize_text_field($item);
-            }, $value));
-          } else {
-            $sanitized_value = sanitize_text_field( $value );
-          }
-          break;
-        case 'oembed':
-          $sanitized_value = esc_url_raw($value);
-          break;
-        case 'wysiwyg':
-          $sanitized_value = wp_kses_post( $value );
-          break;
-        case 'textarea':
-          $sanitized_value = sanitize_textarea_field( $value );
-          break;
-        case 'range':
-        case 'number':
-          $sanitized_value = filter_var( $value, FILTER_SANITIZE_NUMBER_FLOAT, FILTER_FLAG_ALLOW_FRACTION);
-          break;
-        case 'image':
-        case 'file':
-        case 'true_false':
-            $sanitized_value = filter_var( $value, FILTER_SANITIZE_NUMBER_INT );
-            break;
-        default:
-          $sanitized_value = '';
+      if ( array_key_exists( self::SETTINGS_TABLE_NAME, $field_group ) ) {
+        $field_group[self::SETTINGS_TABLE_NAME] = acfict_sanitize_keyword( $field_group[self::SETTINGS_TABLE_NAME] );
       }
-
-      return $sanitized_value;
+      return $field_group;
     }
 
-    private function sanitizeTableName($value) {
-      return str_replace( '-','_', sanitize_key( $value ) );
-    }
-    private function sanitizeColumnName($value) {
-      return $this->sanitizeTableName($value);
-    }
-
-    private function getColumnDefinition( $field )
-    {
-      $column_type = '';
-      switch ( $field['type'] )
-      {
-        case 'text':
-        case 'email':
-        case 'url':
-        case 'password':
-        case 'radio':
-        case 'button_group':
-          $column_type = 'varchar(255)';
-          break;
-        case 'select':
-        case 'checkbox':
-          $column_type = 'varchar(255)';
-          break;
-        case 'file':
-        case 'image':
-          $column_type = 'bigint(20) unsigned';
-          break;
-        case 'color_picker':
-          $column_type = 'varchar(7)';
-          break;
-        case 'range':
-        case 'number':
-          $column_type = 'float';
-          break;
-        case 'oembed':
-        case 'wysiwyg':
-        case 'textarea':
-          $column_type = 'longtext';
-          break;
-        case 'date_picker':
-          $column_type = 'date';
-          break;
-        case 'date_time_picker':
-          $column_type = 'datetime';
-          break;
-        case 'time_picker':
-          $column_type = 'time';
-          break;
-        case 'true_false':
-          $column_type = 'tinyint(1)';
-          break;
-        default:
-          $column_type = false;
-      }
-
-      $column_definition = $column_type
-        ? sprintf('%s %s %s',
-          $field['name'],
-          $column_type,
-          ($field['required'] ? 'NOT NULL' : 'NULL')
-        )
-        : false
-      ;
-
-      return $column_definition;
-    }
-
-    private function getTableName($name = '') {
+    private function table_name( $name = '' ) {
       global $wpdb;
       return sprintf('%s%s%s', $wpdb->prefix, 'acf_', $name);
     }
 
-    private function isFieldSupported($field) {
-      return $this->getColumnDefinition($field) !== false;
+    private function is_supported( $field ) {
+      return apply_filters('acfict_supports_'.$field['type'], false);
     }
 
-    private function tableExists($table_name)
+    private function table_exists( $table_name )
     {
       global $wpdb;
       $query = $wpdb->prepare( 'SHOW TABLES LIKE %s', $wpdb->esc_like( $table_name ) );
       return $wpdb->get_var( $query ) === $table_name;
     }
 
-    private function addAdminNotice($message, $status) {
-      set_transient('acfict_notice_' . get_current_user_id(), [
-        'message' => $message,
-        'status' => $status
-      ], 30);
-    }
-
-    private function getAdminNotice() {
-      $key = 'acfict_notice_' . get_current_user_id();
-      $transient = get_transient( $key );
-      if ( $transient ) {
-          delete_transient( $key );
+    public function display_admin_notices()
+    {
+      if ( false !== ($message = ACF_FICT_Admin_Notices::get()))
+      {
+        echo sprintf('<div class="notice notice-%s"><p>%s</p></div>',
+          $message['status'],
+          $message['message']
+        );
       }
-      return $transient;
     }
   }
 

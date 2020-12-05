@@ -4,7 +4,7 @@ Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=TW8LT
 Tags: acf,advanced custom fields,fields,meta,custom fields
 Requires at least: 4.9.0
 Tested up to: 5.5.3
-Stable tag: 0.2
+Stable tag: 0.3
 Requires PHP: 7.0
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
@@ -43,6 +43,12 @@ You can contribute to this plugin by submit PR/Issue in [https://github.com/edua
 * Date Time Picker
 * Time Picker
 * Color Picker
+* Link
+* Post Object
+* Page Link
+* Relationship
+* Taxonomy
+* User
 
 = ACF Compatibility =
 
@@ -73,6 +79,9 @@ Setting up ACF: Fields in Custom Table is very simple. Follow these easy steps
 3.	Go to the Custom Fields > Field Groups menu, edit or create a field group and enable ACF: Fields in Custom Table option;
 
 == Changelog ==
+
+= 0.3 =
+*	Added support for the following field types: Link, Post Object, Page Link, Relationship, Taxonomy and User
 
 = 0.2 =
 *	Added support for the following field types: Range, Image, File, oEmbed, Checkbox, Radio Button, Date Time Picker, Time Picker
