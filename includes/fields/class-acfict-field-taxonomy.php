@@ -10,6 +10,10 @@ class ACF_FICT_Field_Taxonomy extends ACF_FICT_Field_Relationship
   public function type( ) {
     return 'taxonomy';
   }
+
+  public function column_type($acf_field) {
+    return !in_array( $acf_field['field_type'], ['multi_select', 'checkbox'] ) ? 'bigint(20) unsigned' : 'longtext';
+  }
 }
 
 new ACF_FICT_Field_Taxonomy();

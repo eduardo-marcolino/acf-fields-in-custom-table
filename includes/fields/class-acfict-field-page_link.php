@@ -19,7 +19,7 @@ class ACF_FICT_Field_Page_Link extends ACF_FICT_Field_Relationship
 
     return json_encode(array_map( function($item) {
       return sanitize_text_field( $item );
-    }, $value));
+    }, $value), JSON_NUMERIC_CHECK);
   }
 }
 

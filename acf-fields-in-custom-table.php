@@ -19,9 +19,11 @@ if ( ! class_exists( 'ACF_FICT' ) )
 {
   defined( 'ACF_FICT_PLUGIN_FILE' ) or define( 'ACF_FICT_PLUGIN_FILE', __FILE__ );
 
-  include_once( plugin_dir_path( __FILE__ ).'includes/acfict-utility-funcitons.php' );
+  include_once( plugin_dir_path( __FILE__ ).'includes/acfict-utility-functions.php' );
 
-  acfict_include( 'includes/class-acfict-admin-notices.php' );
+  acfict_include( 'includes/types/class-acfict-type.php' );
+  acfict_include( 'includes/types/class-acfict-type-column.php' );
+
   acfict_include( 'includes/fields/class-acfict-field.php' );
   acfict_include( 'includes/fields/class-acfict-field-text.php' );
   acfict_include( 'includes/fields/class-acfict-field-email.php' );
@@ -168,6 +170,7 @@ if ( ! class_exists( 'ACF_FICT' ) )
           );
         }
       }
+
       foreach ( $values as $table_name => $data)
       {
         $data['post_id'] = $post_id;
@@ -178,7 +181,7 @@ if ( ! class_exists( 'ACF_FICT' ) )
         if ( false  === $wpdb->replace($this->table_name($table_name), $data ) )
         {
           $message = __('ACF: Fields in Custom Table error:', 'acfict').$wpdb->last_error;
-          ACF_FICT_Admin_Notices::add($message, 'error');
+          acfict_admin_notice_add($message, 'error');
         }
       }
     }
@@ -213,9 +216,8 @@ if ( ! class_exists( 'ACF_FICT' ) )
       foreach ( $fields as $field )
       {
         $column_type = apply_filters('acfict_column_type_'.$field['type'], $field);
-
-        if ( $column_type ) {
-          $columns[] = $column_type;
+        if ( $column_type && is_a( $column_type, 'ACF_FICT_Type_Column') ) {
+          $columns[] = $column_type->get_definition();
         }
       }
 
@@ -226,7 +228,7 @@ if ( ! class_exists( 'ACF_FICT' ) )
 
       if ( $response !== true ) {
         $message = __('ACF: Fields in Custom Table error:', 'acfict').$response;
-        ACF_FICT_Admin_Notices::add($message, 'error');
+        acfict_admin_notice_add($message, 'error');
       }
     }
 
@@ -263,7 +265,7 @@ if ( ! class_exists( 'ACF_FICT' ) )
           $notice .= sprintf('<tr><td>%s</td><td>%s</td></tr>', $column, $text);
         }
         $notice .= '</tbody></table>';
-        ACF_FICT_Admin_Notices::add($notice, 'info');
+        acfict_admin_notice_add($notice, 'info');
       }
 
       return true;
@@ -319,7 +321,7 @@ if ( ! class_exists( 'ACF_FICT' ) )
 
     public function display_admin_notices()
     {
-      if ( false !== ($message = ACF_FICT_Admin_Notices::get()))
+      if ( false !== ($message = acfict_admin_notice_get()))
       {
         echo sprintf('<div class="notice notice-%s"><p>%s</p></div>',
           $message['status'],

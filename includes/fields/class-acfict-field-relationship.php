@@ -8,7 +8,14 @@
 class ACF_FICT_Field_Relationship extends ACF_FICT_Field
 {
   public $name = 'relationship';
-  public $column_type = 'longtext';
+
+  public function column_type($acf_field)
+  {
+    if ( $acf_field['type'] == $this->name )
+      return 'longtext';
+
+    return !$acf_field['multiple'] ? 'bigint(20) unsigned' : 'longtext';
+  }
 
   public function sanitize( $value, $acf_field )
   {
@@ -18,7 +25,7 @@ class ACF_FICT_Field_Relationship extends ACF_FICT_Field
 
     return json_encode(array_map( function($item) {
       return filter_var( $item, FILTER_SANITIZE_NUMBER_INT );
-    }, $value));
+    }, $value), JSON_NUMERIC_CHECK);
   }
 
   public function escape( $value, $acf_field ) {

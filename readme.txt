@@ -50,6 +50,38 @@ You can contribute to this plugin by submit PR/Issue in [https://github.com/edua
 * Taxonomy
 * User
 
+= Relational Fields =
+
+This plugin supports the following relational field types: Post Object, Page Link, Relationship, Taxonomy and User.
+
+It can store both single and multiple values based on the `multiple` option.
+
+* If it's a single value field, then the column type will be `bigint(20) unsigned`
+* If it's a multiple value field, then the column type will be longtext and the date will be stored in json format.
+
+You can query relational fields with multiple values using using MySQL's function [JSON_CONTAINS](https://dev.mysql.com/doc/refman/5.7/en/json-search-functions.html#function_json-contains).
+Here is an example:
+
+Table:
+
+```
++---------+-------------------+--------+
+| post_id |       title       | stores |
++---------+-------------------+--------+
+|       1 | Lord of the Flies | [1,2]  |
+|       2 | The Island        | [2]    |
+|       3 | 1984              | [3]    |
++---------+-------------------+--------+
+```
+
+Query:
+
+```sql
+SELECT * FROM wp_acf_books WHERE JSON_CONTAINS(stores, 2, '$')
+```
+
+The query above will return "Lord of the Flies" and "The Island".
+
 = ACF Compatibility =
 
 This plugin was testes with *ACF 5 FREE Version* .
@@ -89,3 +121,14 @@ Setting up ACF: Fields in Custom Table is very simple. Follow these easy steps
 
 = 0.1 =
 *	First version of the plugin released
+
+== Upgrade Notice ==
+
+= 0.3 =
+Added plugin support for 6 more field: Link, Post Object, Page Link, Relationship, Taxonomy and User along with major refactory to improve code quality.
+
+= 0.2 =
+Added support for the following field types Range, Image, File, oEmbed, Checkbox, Radio Button, Date Time Picker, Time Picker. The plugin now delegates all the database modifications to the dbDelta function.
+
+= 0.1 =
+*	Just released into the wild.
