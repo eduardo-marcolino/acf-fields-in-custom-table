@@ -36,7 +36,7 @@ It was heavily inspired by Austin Ginder's post [https://anchor.host/acf-custom-
 - Taxonomy
 - User
 
-## Relational Fields =
+## Relational Fields
 
 This plugin supports the following relational field types: Post Object, Page Link, Relationship, Taxonomy and User.
 
