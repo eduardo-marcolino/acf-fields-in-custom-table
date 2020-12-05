@@ -151,7 +151,6 @@ if ( ! class_exists( 'ACF_FICT' ) )
     {
       global $wpdb;
       $values = [];
-      //die(print_r($_POST['acf'], true));
 
       foreach ( $_POST['acf'] as $key => $value )
       {
@@ -210,7 +209,6 @@ if ( ! class_exists( 'ACF_FICT' ) )
 
       $columns  = [];
       $fields   = acf_get_fields( $field_group );
-      //die('<pre>'.print_r($fields, true));
 
       foreach ( $fields as $field )
       {
@@ -232,7 +230,7 @@ if ( ! class_exists( 'ACF_FICT' ) )
       }
     }
 
-    private function do_create_Or_alter_table( $table_name, $columns )
+    private function do_create_or_alter_table( $table_name, $columns )
     {
       if (count($columns) === 0 ) {
         return 'No supported fields';
