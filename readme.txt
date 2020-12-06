@@ -64,7 +64,7 @@ Here is an example:
 
 Table:
 
-```
+`
 +---------+-------------------+--------+
 | post_id |       title       | stores |
 +---------+-------------------+--------+
@@ -72,13 +72,11 @@ Table:
 |       2 | The Island        | [2]    |
 |       3 | 1984              | [3]    |
 +---------+-------------------+--------+
-```
+`
 
 Query:
 
-```sql
-SELECT * FROM wp_acf_books WHERE JSON_CONTAINS(stores, 2, '$')
-```
+`SELECT * FROM wp_acf_books WHERE JSON_CONTAINS(stores, 2, '$')`
 
 The query above will return "Lord of the Flies" and "The Island".
 
@@ -125,7 +123,7 @@ Setting up ACF: Fields in Custom Table is very simple. Follow these easy steps
 == Upgrade Notice ==
 
 = 0.3 =
-Added plugin support for 6 more field: Link, Post Object, Page Link, Relationship, Taxonomy and User along with major refactory to improve code quality.
+Added plugin support for 6 more fields: Link, Post Object, Page Link, Relationship, Taxonomy and User along with major refactory to improve code quality.
 
 = 0.2 =
 Added support for the following field types Range, Image, File, oEmbed, Checkbox, Radio Button, Date Time Picker, Time Picker. The plugin now delegates all the database modifications to the dbDelta function.
