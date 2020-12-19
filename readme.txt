@@ -3,8 +3,8 @@ Contributors: eduardo.marcolino
 Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=TW8LTG6J7XVP2&item_name=Donation+for+Wordpress+Plugin&currency_code=USD
 Tags: acf,advanced custom fields,fields,meta,custom fields
 Requires at least: 4.9.0
-Tested up to: 5.5.3
-Stable tag: 0.3
+Tested up to: 5.6
+Stable tag: 0.4
 Requires PHP: 7.0
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
@@ -110,6 +110,9 @@ Setting up ACF: Fields in Custom Table is very simple. Follow these easy steps
 
 == Changelog ==
 
+= 0.4 =
+*	Small performance improvement and testing on Wordpress 5.6
+
 = 0.3 =
 *	Added support for the following field types: Link, Post Object, Page Link, Relationship, Taxonomy and User
 
@@ -121,6 +124,9 @@ Setting up ACF: Fields in Custom Table is very simple. Follow these easy steps
 *	First version of the plugin released
 
 == Upgrade Notice ==
+
+= 0.4 =
+Plugin tested on Wordpress 5.6 and small performance improvement.
 
 = 0.3 =
 Added plugin support for 6 more fields: Link, Post Object, Page Link, Relationship, Taxonomy and User along with major refactory to improve code quality.

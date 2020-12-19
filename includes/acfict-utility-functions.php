@@ -72,15 +72,3 @@ function acfict_admin_notice_get()
   }
   return $transient;
 }
-
-add_action('init', function()
-{
-  register_post_type('healthcare', [
-    'labels'      => [
-      'name'          => 'Plano de Saúde',
-      'singular_name' => 'Planos de Saúde'
-    ],
-    'public'      => true,
-    'has_archive' => true,
-  ]);
-});

@@ -2,7 +2,7 @@
 /*
 Plugin Name: ACF: Fields in Custom Table
 Description: Stores ACF custom fields in a custom table instead of WordPress core meta tables.
-Version: 0.3
+Version: 0.4
 Author: Eduardo Marcolino
 Author URI: https://eduardomarcolino.com
 Text Domain: acfict
@@ -273,13 +273,16 @@ if ( ! class_exists( 'ACF_FICT' ) )
 
     public function load_field_from_custom_table( $value, $post_id, $field )
     {
-      $table_name = $this->table_name( $field[self::SETTINGS_TABLE_NAME] );
       if (
-        array_key_exists(self::SETTINGS_ENABLED, $field) &&
-        $field[self::SETTINGS_ENABLED] &&
-        $this->table_exists( $table_name ) &&
-        $this->is_supported($field)
-      )
+        !$this->is_supported( $field ) ||
+        !array_key_exists( self::SETTINGS_ENABLED, $field ) ||
+        ( array_key_exists( self::SETTINGS_ENABLED, $field )  && !$field[self::SETTINGS_ENABLED] )
+      ) {
+        return $value;
+      }
+
+      $table_name = $this->table_name( $field[self::SETTINGS_TABLE_NAME] );
+      if ( $this->table_exists( $table_name ) )
       {
         global $wpdb;
 
