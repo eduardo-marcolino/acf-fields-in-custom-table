@@ -105,7 +105,7 @@ if ( ! class_exists( 'ACF_FICT' ) )
       ] );
 
       acf_render_field_wrap( [
-        'label'			=> _( 'Custom table name', 'acfict' ),
+        'label'			=> __( 'Custom table name', 'acfict' ),
         'instructions'	=> __( 'Define the custom table name. Make sure it doesn\'t conflict with others tables names.', 'acfict' ),
         'type'			=> 'text',
         'name'			=> self::SETTINGS_TABLE_NAME,
