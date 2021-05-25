@@ -2,7 +2,7 @@
 /*
 Plugin Name: ACF: Fields in Custom Table
 Description: Stores ACF custom fields in a custom table instead of WordPress core meta tables.
-Version: 0.4
+Version: 0.5
 Author: Eduardo Marcolino
 Author URI: https://eduardomarcolino.com
 Text Domain: acfict
@@ -58,6 +58,7 @@ if ( ! class_exists( 'ACF_FICT' ) )
     private static $instance = null;
     const SETTINGS_TABLE_NAME = 'acfict_table_name';
     const SETTINGS_ENABLED = 'acfict_enabled';
+    const SETTINGS_USE_PREFIX = 'acfict_use_prefix';
 
     public static function getInstance()
     {
@@ -105,6 +106,22 @@ if ( ! class_exists( 'ACF_FICT' ) )
       ] );
 
       acf_render_field_wrap( [
+        'label'			    => __('Use Prefix', 'acfict'),
+        'instructions'	=> __( 'Append table name with prefix', 'acfict' ),
+        'type'			    => 'true_false',
+        'name'			    => self::SETTINGS_USE_PREFIX,
+        'key'           => self::SETTINGS_USE_PREFIX,
+        'prefix'		    => 'acf_field_group',
+        'value'         => esc_attr(acf_maybe_get( $field_group, self::SETTINGS_USE_PREFIX, true )),
+        'ui'			      => 1,
+        'conditional_logic' => [
+          'field' => self::SETTINGS_ENABLED,
+          'operator' => '==',
+          'value' => '1',
+        ]
+      ] );
+
+      acf_render_field_wrap( [
         'label'			=> __( 'Custom table name', 'acfict' ),
         'instructions'	=> __( 'Define the custom table name. Make sure it doesn\'t conflict with others tables names.', 'acfict' ),
         'type'			=> 'text',
@@ -113,6 +130,9 @@ if ( ! class_exists( 'ACF_FICT' ) )
         'value'			=> esc_attr(acf_maybe_get( $field_group, self::SETTINGS_TABLE_NAME, false )),
         'prepend'   => $this->table_name(),
         'required'  => true,
+        'wrapper'   => [
+          'class' => self::SETTINGS_TABLE_NAME.'_wrapper'
+        ],
         'conditional_logic' => [
           'field' => self::SETTINGS_ENABLED,
           'operator' => '==',
@@ -123,6 +143,15 @@ if ( ! class_exists( 'ACF_FICT' ) )
       ?>
         <script type="text/javascript">
         if( typeof acf !== 'undefined' ) {
+
+          var field = acf.getField('acfict_use_prefix');
+          var prefixEl = jQuery('.<?php echo self::SETTINGS_TABLE_NAME ?>_wrapper .acf-input-prepend');
+          if(field.val() == false) {
+            prefixEl.addClass('acf-hidden')
+          }
+          field.on('change', function(e){
+            prefixEl.toggleClass('acf-hidden')
+          })
 
           acf.newPostbox({
             'id': 'acf-field-acfict',
@@ -140,6 +169,7 @@ if ( ! class_exists( 'ACF_FICT' ) )
 
       foreach ([
         self::SETTINGS_ENABLED      => false,
+        self::SETTINGS_USE_PREFIX   => true,
         self::SETTINGS_TABLE_NAME   => null
       ] as $key => $defaul_value)
       {
@@ -163,7 +193,7 @@ if ( ! class_exists( 'ACF_FICT' ) )
           $this->is_supported($field)
         ) {
           $column_name = acfict_sanitize_keyword($field['name']);
-          $values[$field[self::SETTINGS_TABLE_NAME]][$column_name] = apply_filters(
+          $values[$this->table_name($field[self::SETTINGS_TABLE_NAME], $field[self::SETTINGS_USE_PREFIX])][$column_name] = apply_filters(
             'acfict_sanitize_'.$field['type'],
             $value,
             $field
@@ -178,7 +208,7 @@ if ( ! class_exists( 'ACF_FICT' ) )
         $wpdb->suppress_errors = true;
         $wpdb->show_errors = false;
 
-        if ( false  === $wpdb->replace($this->table_name($table_name), $data ) )
+        if ( false  === $wpdb->replace($table_name, $data ) )
         {
           $message = __('ACF: Fields in Custom Table error:', 'acfict').$wpdb->last_error;
           acfict_admin_notice_add($message, 'error');
@@ -197,7 +227,7 @@ if ( ! class_exists( 'ACF_FICT' ) )
           $field_group[self::SETTINGS_TABLE_NAME]
         ) {
           $wpdb->delete(
-            $this->table_name($field_group[self::SETTINGS_TABLE_NAME]),
+            $this->table_name($field_group[self::SETTINGS_TABLE_NAME], $field_group[self::SETTINGS_USE_PREFIX]),
             ['post_id' => $post_id]
           );
         }
@@ -222,7 +252,7 @@ if ( ! class_exists( 'ACF_FICT' ) )
       }
 
       $response = $this->do_create_or_alter_table(
-        $this->table_name( $field_group[self::SETTINGS_TABLE_NAME] ),
+        $this->table_name( $field_group[self::SETTINGS_TABLE_NAME], $field_group[self::SETTINGS_USE_PREFIX] ),
         $columns
       );
 
@@ -281,7 +311,7 @@ if ( ! class_exists( 'ACF_FICT' ) )
         return $value;
       }
 
-      $table_name = $this->table_name( $field[self::SETTINGS_TABLE_NAME] );
+      $table_name = $this->table_name( $field[self::SETTINGS_TABLE_NAME], $field[self::SETTINGS_USE_PREFIX] );
       if ( $this->table_exists( $table_name ) )
       {
         global $wpdb;
@@ -306,9 +336,10 @@ if ( ! class_exists( 'ACF_FICT' ) )
       return $field_group;
     }
 
-    private function table_name( $name = '' ) {
+    private function table_name( $name = '', $use_prefix = true) {
       global $wpdb;
-      return sprintf('%s%s%s', $wpdb->prefix, 'acf_', $name);
+      $prefix = $use_prefix ? apply_filters('acfict_table_prefix', $wpdb->prefix.'acf_', $name) : '';
+      return $prefix.$name;
     }
 
     private function is_supported( $field ) {

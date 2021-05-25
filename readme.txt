@@ -3,8 +3,8 @@ Contributors: eduardo.marcolino
 Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=TW8LTG6J7XVP2&item_name=Donation+for+Wordpress+Plugin&currency_code=USD
 Tags: acf,advanced custom fields,fields,meta,custom fields
 Requires at least: 4.9.0
-Tested up to: 5.6
-Stable tag: 0.4
+Tested up to: 5.7
+Stable tag: 0.5
 Requires PHP: 7.0
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
@@ -95,6 +95,11 @@ Yes. It supports custom post types and built in types of post and page
 The value will be stored in the core meta tables instead of the custom table
 
 Yes. It supports custom post types and built in types of post and page
+
+= What are the plugin filters and actions ? =
+
+The plugin provides filters to allow developers to customize the plugin behavior.
+Please [access the documentation](https://github.com/eduardo-marcolino/acf-fields-in-custom-table#filters) to get the list of it.
 
 == Screenshots ==
 

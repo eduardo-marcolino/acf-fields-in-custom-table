@@ -68,6 +68,18 @@ SELECT * FROM wp_acf_books WHERE JSON_CONTAINS(stores, 2, '$')
 
 The query above will return "Lord of the Flies" and "The Island"
 
+## Filters
+
+The plugin provides filters to allow developers to customize the plugin behavior:
+
+### Table Prefix
+
+```php
+add_filter( 'acfict_table_prefix', function($prefix, $tablename) {
+  return 'newprefix_';
+}, 10, 2);
+```
+
 ## ACF Compatibility
 
 This plugin was testes with *ACF 5 FREE Version* .
