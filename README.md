@@ -72,17 +72,35 @@ The query above will return "Lord of the Flies" and "The Island"
 
 The plugin provides filters to allow developers to customize the plugin behavior:
 
-### Table Prefix
+### Chaging table prefix
 
 ```php
-add_filter( 'acfict_table_prefix', function($prefix, $tablename) {
+add_filter( 'acfict_table_prefix', function( $prefix, $tablename ) {
   return 'newprefix_';
 }, 10, 2);
 ```
 
+### Disabling WP Post Meta storage
+
+By default the data is still stored in WP Post Meta but you can disable it using acf filter `acf/pre_update_value` as such:
+
+```php
+
+//Will disable WP Post Meta storage for all field groupd with "ACF: Fields in Custom Table" enabled.
+add_filter( 'acf/pre_update_value', function( $default, $value, $post_id, $field )
+{
+  if( $field[ACF_FICT::SETTINGS_ENABLED] ) {
+    return false;
+  }
+
+  return $default;
+}, 10, 4);
+
+```
+
 ## ACF Compatibility
 
-This plugin was testes with *ACF 5 FREE Version* .
+This plugin was tested with *ACF 5 FREE Version* .
 
 ## Screenshots
 

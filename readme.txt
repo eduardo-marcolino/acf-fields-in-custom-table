@@ -82,7 +82,7 @@ The query above will return "Lord of the Flies" and "The Island".
 
 = ACF Compatibility =
 
-This plugin was testes with *ACF 5 FREE Version* .
+This plugin was tested with *ACF 5 FREE Version* .
 
 == Frequently Asked Questions ==
 
@@ -115,6 +115,11 @@ Setting up ACF: Fields in Custom Table is very simple. Follow these easy steps
 
 == Changelog ==
 
+= 0.5 =
+* Added filter acfict_table_prefix to customize table prefix
+* Added setting for allow user to disable table prefix usage
+*	Testing on Wordpress 5.7
+
 = 0.4 =
 *	Small performance improvement and testing on Wordpress 5.6
 
@@ -129,6 +134,9 @@ Setting up ACF: Fields in Custom Table is very simple. Follow these easy steps
 *	First version of the plugin released
 
 == Upgrade Notice ==
+
+= 0.5 =
+Plugin tested on Wordpress 5.7, documentation improvement and more control over table prefix and table name.
 
 = 0.4 =
 Plugin tested on Wordpress 5.6 and small performance improvement.
