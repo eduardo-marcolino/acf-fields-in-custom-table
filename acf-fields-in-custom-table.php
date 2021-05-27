@@ -22,6 +22,7 @@ if ( ! class_exists( 'ACF_FICT' ) )
   include_once( plugin_dir_path( __FILE__ ).'includes/acfict-utility-functions.php' );
 
   acfict_include( 'includes/types/class-acfict-type.php' );
+  acfict_include( 'includes/types/class-acfict-type-table.php' );
   acfict_include( 'includes/types/class-acfict-type-column.php' );
 
   acfict_include( 'includes/fields/class-acfict-field.php' );
@@ -51,6 +52,7 @@ if ( ! class_exists( 'ACF_FICT' ) )
   acfict_include( 'includes/fields/class-acfict-field-page_link.php' );
   acfict_include( 'includes/fields/class-acfict-field-taxonomy.php' );
   acfict_include( 'includes/fields/class-acfict-field-user.php' );
+  acfict_include( 'includes/fields/class-acfict-field-repeater.php' );
 
   final class ACF_FICT
   {
@@ -78,6 +80,7 @@ if ( ! class_exists( 'ACF_FICT' ) )
       add_action( 'acf/save_post', [$this, 'store_fields_in_custom_table'], 1 );
       add_action( 'delete_post', [$this, 'delete_fields_in_custom_table'] );
       add_action( 'admin_notices', [$this, 'display_admin_notices'] );
+      add_action( 'acf/render_field_settings/type=repeater', [$this, 'add_repeater_settings']);
 
       add_filter( 'acf/load_field', [$this, 'add_settings'] );
       add_filter( 'acf/load_value', [$this, 'load_field_from_custom_table'], 11, 3 );
@@ -144,6 +147,15 @@ if ( ! class_exists( 'ACF_FICT' ) )
         <script type="text/javascript">
         if( typeof acf !== 'undefined' ) {
 
+          acf.addFilter('generate_field_object_name', function(val, field) {
+
+            if (field.prop('<?php echo self::SETTINGS_TABLE_NAME ?>') == '') {
+              field.prop('<?php echo self::SETTINGS_TABLE_NAME ?>', val)
+            }
+
+            return val;
+          });
+
           var field = acf.getField('acfict_use_prefix');
           var prefixEl = jQuery('.<?php echo self::SETTINGS_TABLE_NAME ?>_wrapper .acf-input-prepend');
           if(field.val() == false) {
@@ -163,6 +175,20 @@ if ( ! class_exists( 'ACF_FICT' ) )
       <?php
     }
 
+    public function add_repeater_settings( $field ) {
+
+      acf_render_field_setting( $field, array(
+        'label'			    => __( 'Custom table name', 'acfict' ),
+        'instructions'	=> __( 'Define the repeater field table name.', 'acfict' ),
+        'type'			    => 'text',
+        'name'			    => self::SETTINGS_TABLE_NAME,
+        'prepend'       => $this->table_name(),
+        'wrapper'   => [
+          'class' => self::SETTINGS_TABLE_NAME.'_wrapper repeater_wrapper'
+        ],
+      ));
+    }
+
     public function add_settings( $field )
     {
       $field_group = acf_get_field_group( $field['parent'] );
@@ -173,7 +199,9 @@ if ( ! class_exists( 'ACF_FICT' ) )
         self::SETTINGS_TABLE_NAME   => null
       ] as $key => $defaul_value)
       {
-        $field[$key] = acf_maybe_get( $field_group, $key, $defaul_value );
+        if (!array_key_exists($key, $field)) {
+          $field[$key] = acf_maybe_get( $field_group, $key, $defaul_value );
+        }
       }
 
       return $field;
@@ -243,18 +271,14 @@ if ( ! class_exists( 'ACF_FICT' ) )
       $columns  = [];
       $fields   = acf_get_fields( $field_group );
 
-      foreach ( $fields as $field )
-      {
-        $column_type = apply_filters('acfict_column_type_'.$field['type'], $field);
-        if ( $column_type && is_a( $column_type, 'ACF_FICT_Type_Column') ) {
-          $columns[] = $column_type->get_definition();
-        }
-      }
+      $structure = new ACF_FICT_Type_Table($field_group[self::SETTINGS_TABLE_NAME], $fields);
 
-      $response = $this->do_create_or_alter_table(
-        $this->table_name( $field_group[self::SETTINGS_TABLE_NAME], $field_group[self::SETTINGS_USE_PREFIX] ),
-        $columns
-      );
+      foreach($structure->get_definition() as $table_name => $columns) {
+        $response = $this->do_create_or_alter_table(
+          $this->table_name( $table_name, $field_group[self::SETTINGS_USE_PREFIX] ),
+          $columns
+        );
+      }
 
       if ( $response !== true ) {
         $message = __('ACF: Fields in Custom Table error:', 'acfict').$response;
