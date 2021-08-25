@@ -69,8 +69,6 @@ if ( ! class_exists( 'ACF_FICT' ) )
       return static::$instance;
     }
 
-    private function __wakeup() {}
-
     private function __construct()
     {
       add_action( 'acf/field_group/admin_head', [$this, 'register_meta_box'] );
