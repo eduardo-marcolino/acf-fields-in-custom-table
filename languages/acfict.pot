@@ -2,7 +2,7 @@
 # This file is distributed under the same license as the ACF: Fields in Custom Table plugin.
 msgid ""
 msgstr ""
-"Project-Id-Version: ACF: Fields in Custom Table 0.1\n"
+"Project-Id-Version: ACF: Fields in Custom Table\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/acf-fields-in-custom-table\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -30,35 +30,32 @@ msgstr ""
 msgid "https://eduardomarcolino.com"
 msgstr ""
 
-#: acf-fields-in-custom-table.php:75
 msgid "Enabled"
 msgstr ""
 
-#: acf-fields-in-custom-table.php:76
 msgid "Enable Store fields in custom table for this field group?"
 msgstr ""
 
-#: acf-fields-in-custom-table.php:86
 msgid "Custom table name"
 msgstr ""
 
-#: acf-fields-in-custom-table.php:87
 msgid "Define the custom table name. Make sure it doesn't conflict with others tables names."
 msgstr ""
 
-#: acf-fields-in-custom-table.php:157
-#: acf-fields-in-custom-table.php:204
 msgid "ACF: Fields in Custom Table error:"
 msgstr ""
 
-#: acf-fields-in-custom-table.php:263
 msgid "ACF: Fields in Custom Table: Database Changes"
 msgstr ""
 
-#: acf-fields-in-custom-table.php:265
 msgid "Column Name"
 msgstr ""
 
-#: acf-fields-in-custom-table.php:265
 msgid "Modification"
+msgstr ""
+
+msgid "Sorry, but this plugin requires the ACF Free or ACF Pro plugin to be installed and active."
+msgstr ""
+
+msgid "Return to plugins"
 msgstr ""

@@ -15,11 +15,18 @@ GitHub Plugin URI: https://github.com/eduardo-marcolino/acf-fields-in-custom-tab
 // Exit if accessed directly
 if ( ! defined( 'ABSPATH' ) ) exit;
 
+// Run on plugin activation
+function ACF_FICT_activation() {
+    require_once "activation.php";
+    ACF_FICT_activation_check();
+}
+register_activation_hook(__FILE__, 'ACF_FICT_activation');
+
 if ( ! class_exists( 'ACF_FICT' ) )
 {
   defined( 'ACF_FICT_PLUGIN_FILE' ) or define( 'ACF_FICT_PLUGIN_FILE', __FILE__ );
-
-  include_once( plugin_dir_path( __FILE__ ).'includes/acfict-utility-functions.php' );
+    
+  include_once( plugin_dir_path( __FILE__ ) . 'includes/acfict-utility-functions.php' );
 
   acfict_include( 'includes/types/class-acfict-type.php' );
   acfict_include( 'includes/types/class-acfict-type-column.php' );
