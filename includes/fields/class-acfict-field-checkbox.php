@@ -7,9 +7,10 @@
  */
 class ACF_FICT_Field_Checkbox extends ACF_FICT_Field_Select
 {
-  public function type() {
-    return 'checkbox';
-  }
+    public function type()
+    {
+        return 'checkbox';
+    }
 }
 
 new ACF_FICT_Field_Checkbox();

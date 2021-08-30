@@ -7,9 +7,10 @@
  */
 class ACF_FICT_Field_User extends ACF_FICT_Field_Relationship
 {
-  public function type( ) {
-    return 'user';
-  }
+    public function type()
+    {
+        return 'user';
+    }
 }
 
 new ACF_FICT_Field_User();

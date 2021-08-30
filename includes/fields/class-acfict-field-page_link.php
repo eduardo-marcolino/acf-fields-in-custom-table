@@ -7,20 +7,21 @@
  */
 class ACF_FICT_Field_Page_Link extends ACF_FICT_Field_Relationship
 {
-  public function type( ) {
-    return 'page_link';
-  }
-
-  public function sanitize( $value, $acf_field )
-  {
-    if ( !is_array($value) ) {
-      return sanitize_text_field( $value );
+    public function type()
+    {
+        return 'page_link';
     }
 
-    return json_encode(array_map( function($item) {
-      return sanitize_text_field( $item );
-    }, $value), JSON_NUMERIC_CHECK);
-  }
+    public function sanitize($value, $acf_field)
+    {
+        if (!is_array($value)) {
+            return sanitize_text_field($value);
+        }
+
+        return json_encode(array_map(function ($item) {
+            return sanitize_text_field($item);
+        }, $value), JSON_NUMERIC_CHECK);
+    }
 }
 
 new ACF_FICT_Field_Page_Link();

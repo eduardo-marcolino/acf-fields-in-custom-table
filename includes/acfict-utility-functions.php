@@ -5,15 +5,16 @@
  *
  * Includes a file within the ACF Fields in Custom Table plugin.
  *
- * @date	2020-12-05
- * @since	0.3
+ * @date    2020-12-05
+ * @since    0.3
  *
- * @param	string $filename The specified file.
- * @return	void
+ * @param    string $filename The specified file.
+ * @return    void
  */
 
-function acfict_include( $filepath ) {
-  include_once( plugin_dir_path( ACF_FICT_PLUGIN_FILE ).$filepath );
+function acfict_include($filepath)
+{
+    include_once plugin_dir_path(ACF_FICT_PLUGIN_FILE) . $filepath;
 }
 
 /**
@@ -21,15 +22,16 @@ function acfict_include( $filepath ) {
  *
  * Sanitize database keywords values
  *
- * @date	2020-12-05
- * @since	0.3
+ * @date    2020-12-05
+ * @since    0.3
  *
- * @param	string $string
+ * @param    string $string
  * @return string
  */
 
-function acfict_sanitize_keyword( $value ) {
-  return str_replace( '-','_', sanitize_key( $value ) );
+function acfict_sanitize_keyword($value)
+{
+    return str_replace('-', '_', sanitize_key($value));
 }
 
 /**
@@ -37,19 +39,20 @@ function acfict_sanitize_keyword( $value ) {
  *
  * Add an admin notice
  *
- * @date	2020-12-05
- * @since	0.3
+ * @date    2020-12-05
+ * @since    0.3
  *
- * @param	string $message
- * @param	string $status error|success|info
+ * @param    string $message
+ * @param    string $status error|success|info
  * @return void
  */
 
-function acfict_admin_notice_add( $message, $status ) {
-  set_transient('acfict_notice_' . get_current_user_id(), [
-    'message' => $message,
-    'status' => $status
-  ], 30);
+function acfict_admin_notice_add($message, $status)
+{
+    set_transient('acfict_notice_' . get_current_user_id(), [
+        'message' => $message,
+        'status' => $status,
+    ], 30);
 }
 
 /**
@@ -57,18 +60,18 @@ function acfict_admin_notice_add( $message, $status ) {
  *
  * Returns the latest admin notice if there is one
  *
- * @date	2020-12-05
- * @since	0.3
+ * @date    2020-12-05
+ * @since    0.3
  *
  * @return string|bool
  */
 
 function acfict_admin_notice_get()
 {
-  $key = 'acfict_notice_' . get_current_user_id();
-  $transient = get_transient( $key );
-  if ( $transient ) {
-      delete_transient( $key );
-  }
-  return $transient;
+    $key = 'acfict_notice_' . get_current_user_id();
+    $transient = get_transient($key);
+    if ($transient) {
+        delete_transient($key);
+    }
+    return $transient;
 }

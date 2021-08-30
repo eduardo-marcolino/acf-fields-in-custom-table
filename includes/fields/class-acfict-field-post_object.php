@@ -7,9 +7,10 @@
  */
 class ACF_FICT_Field_Post_Object extends ACF_FICT_Field_Relationship
 {
-  public function type( ) {
-    return 'post_object';
-  }
+    public function type()
+    {
+        return 'post_object';
+    }
 }
 
 new ACF_FICT_Field_Post_Object();
