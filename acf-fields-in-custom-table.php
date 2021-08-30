@@ -25,10 +25,28 @@ function ACF_FICT_activation()
 }
 register_activation_hook(__FILE__, 'ACF_FICT_activation');
 
+// Register the submenu page under the Obiq parent plugin
+include "includes/admin-pages/acf-fict-options.page.php";
+function ACF_FICT_register_options_page()
+{
+    add_submenu_page(
+        "edit.php?post_type=acf-field-group",
+        __('Custom Table', 'acfict'),
+        __('Custom Table', 'acfict'),
+        "administrator",
+        "acf-fict-options",
+        "ACF_FICT_options_page",
+        3
+    );
+}
+add_action('admin_menu', 'ACF_FICT_register_options_page', 11);
+
 if (!class_exists('ACF_FICT')) {
     defined('ACF_FICT_PLUGIN_FILE') or define('ACF_FICT_PLUGIN_FILE', __FILE__);
 
     include_once plugin_dir_path(__FILE__) . 'includes/acfict-utility-functions.php';
+
+    acfict_include('includes/filters/disable_wp_post_meta_storage.filter.php');
 
     acfict_include('includes/types/class-acfict-type.php');
     acfict_include('includes/types/class-acfict-type-column.php');
@@ -339,7 +357,7 @@ if (!class_exists('ACF_FICT')) {
         private function table_name($name = '', $use_prefix = true)
         {
             global $wpdb;
-            $prefix = $use_prefix ? apply_filters('acfict_table_prefix', $wpdb->prefix . 'acf_', $name) : '';
+            $prefix = $use_prefix ? apply_filters('acfict_table_prefix', get_option("acfict_table_prefix_value", $wpdb->prefix)) : '';
             return $prefix . $name;
         }
 

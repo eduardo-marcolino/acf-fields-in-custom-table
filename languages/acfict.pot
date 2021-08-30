@@ -59,3 +59,15 @@ msgstr ""
 
 msgid "Return to plugins"
 msgstr ""
+
+msgid "Options"
+msgstr ""
+
+msgid "Here are some options you can easily change!"
+msgstr ""
+
+msgid "Custom table prefix"
+msgstr ""
+
+msgid "Disable WP Post Meta storage"
+msgstr ""
