@@ -33,28 +33,15 @@ function ACF_FICT_uninstall()
 }
 register_uninstall_hook(__FILE__, "ACF_FICT_uninstall");
 
-// Register the submenu page under the Obiq parent plugin
-include "includes/admin-pages/acf-fict-options.page.php";
-function ACF_FICT_register_options_page()
-{
-    add_submenu_page(
-        "edit.php?post_type=acf-field-group",
-        __('Custom Table', 'acfict'),
-        __('Custom Table', 'acfict'),
-        "administrator",
-        "acf-fict-options",
-        "ACF_FICT_options_page",
-        3
-    );
-}
-add_action('admin_menu', 'ACF_FICT_register_options_page', 11);
-
 if (!class_exists('ACF_FICT')) {
     defined('ACF_FICT_PLUGIN_FILE') or define('ACF_FICT_PLUGIN_FILE', __FILE__);
 
     include_once plugin_dir_path(__FILE__) . 'includes/acfict-utility-functions.php';
 
-    acfict_include('includes/filters/disable_wp_post_meta_storage.filter.php');
+    // Register a new view to the ACF plugin
+    acfict_include("includes/views/acf-fict-options.class.php");
+
+    acfict_include('includes/filters/disable-wp-post-meta-storage.filter.php');
 
     acfict_include('includes/types/class-acfict-type.php');
     acfict_include('includes/types/class-acfict-type-column.php');
