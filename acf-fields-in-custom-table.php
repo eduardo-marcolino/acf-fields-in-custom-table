@@ -25,6 +25,14 @@ function ACF_FICT_activation()
 }
 register_activation_hook(__FILE__, 'ACF_FICT_activation');
 
+// Run on plugin uninstall
+function ACF_FICT_uninstall()
+{
+    require_once "uninstall.php";
+    ACF_FICT_uninstall_check();
+}
+register_uninstall_hook(__FILE__, "ACF_FICT_uninstall");
+
 // Register the submenu page under the Obiq parent plugin
 include "includes/admin-pages/acf-fict-options.page.php";
 function ACF_FICT_register_options_page()
@@ -357,7 +365,7 @@ if (!class_exists('ACF_FICT')) {
         private function table_name($name = '', $use_prefix = true)
         {
             global $wpdb;
-            $prefix = $use_prefix ? apply_filters('acfict_table_prefix', get_option("acfict_table_prefix_value", $wpdb->prefix)) : '';
+            $prefix = $use_prefix ? apply_filters('acfict_table_prefix', $wpdb->prefix . get_option("acfict_table_prefix_value", "acf_"), $name) : '';
             return $prefix . $name;
         }
 
