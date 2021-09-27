@@ -317,6 +317,24 @@ if (!class_exists('ACF_FICT')) {
 
         public function load_field_from_custom_table($value, $post_id, $field)
         {
+
+            if (get_option("acfict_disable_wp_post_meta_storage_value", "false") == "true") {
+                global $wpdb;
+                // Parse table name and post_id
+                $post_id_details = preg_split('/(_)(?!.*_)/', $post_id);
+                $table_name = $wpdb->prefix . get_option("acfict_table_prefix_value", "acf_") . $post_id_details[0];
+                // Make sure to only get the int value
+                $post_id = preg_replace('/\D/', '', $post_id_details[1]);
+
+                // Column name is always equal to field name
+                $column_name = $field["name"];
+
+                $sql_for_value = $wpdb->prepare("SELECT %1\$s FROM %2\$s WHERE 'post_id' = %d", $column_name, $table_name, $post_id);
+                $value = $wpdb->get_col($sql_for_value);
+
+                return $value;
+            }
+
             if (
                 !$this->is_supported($field) ||
                 !array_key_exists(self::SETTINGS_ENABLED, $field) ||

@@ -84,6 +84,18 @@ The query above will return "Lord of the Flies" and "The Island".
 
 This plugin was tested with *ACF 5 FREE Version* .
 
+= Plugin options =
+
+This plugin adds a new submenu to ACF where you can manage options such as a custom table prefix or if you'd like to disable double saving of data.
+
+== Disable WP Post Meta storage ==
+
+If you have disabled you can use get_field in the following way:
+get_field("your_custom_field", "custom_table_without_the_prefix_" . "post_id");
+
+For example if your custom table name is: wp98_acf_my_books where wp98_acf_ is your prefix.
+get_field("your_custom_field", "my_books_0");
+
 == Frequently Asked Questions ==
 
 = This plugin supports custom post types? =
