@@ -36,6 +36,22 @@ It was heavily inspired by Austin Ginder's post [https://anchor.host/acf-custom-
 - Taxonomy
 - User
 
+
+## Plugin options
+
+This plugin adds a new submenu to ACF where you can manage options such as a custom table prefix or if you'd like to disable double saving of data.
+
+### Disable WP Post Meta storage
+
+If you have disabled you can use get_field in the following way:
+```php
+get_field("your_custom_field", "custom_table_without_the_prefix_" . "post_id");
+```
+For example if your custom table name is: `wp98_acf_my_books` where `wp98_acf_` is your prefix.
+```php
+get_field("your_custom_field", "my_books_0");
+```
+
 ## Relational Fields
 
 This plugin supports the following relational field types: Post Object, Page Link, Relationship, Taxonomy and User.
@@ -67,36 +83,6 @@ SELECT * FROM wp_acf_books WHERE JSON_CONTAINS(stores, 2, '$')
 ```
 
 The query above will return "Lord of the Flies" and "The Island"
-
-## Filters
-
-The plugin provides filters to allow developers to customize the plugin behavior:
-
-### Chaging table prefix
-
-```php
-add_filter( 'acfict_table_prefix', function( $prefix, $tablename ) {
-  return 'newprefix_';
-}, 10, 2);
-```
-
-### Disabling WP Post Meta storage
-
-By default the data is still stored in WP Post Meta but you can disable it using acf filter `acf/pre_update_value` as such:
-
-```php
-
-//Will disable WP Post Meta storage for all field groupd with "ACF: Fields in Custom Table" enabled.
-add_filter( 'acf/pre_update_value', function( $default, $value, $post_id, $field )
-{
-  if( $field[ACF_FICT::SETTINGS_ENABLED] ) {
-    return false;
-  }
-
-  return $default;
-}, 10, 4);
-
-```
 
 ## ACF Compatibility
 
